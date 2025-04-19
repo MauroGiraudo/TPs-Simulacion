@@ -36,7 +36,7 @@ for i in range(num_corridas):
       frec_absoluta += 1
     frec_relativas.append(round(frec_absoluta / num_tiradas, 4))
     medias.append(round(sum(valores_corrida) / num_tiradas, 4))
-    var = round(sum((x - medias[-1]) ** 2 for x in valores_corrida) / num_tiradas-1, 4)
+    var = round(sum((x - medias[-1]) ** 2 for x in valores_corrida) / (num_tiradas-1), 4)
     varianzas.append(var)
     desvios_estandar.append(round(var ** 0.5, 4))
     
