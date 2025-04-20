@@ -7,7 +7,7 @@ import numpy as np
 if(len(sys.argv) != 7 or sys.argv[1] != '-c' or sys.argv[3] != '-n' or sys.argv[5] != '-z'):
   print("Uso: python tp1.py -c <numero_tiradas> -n <numero_corridas> -z <valor_elegido>")
   sys.exit(1)
-#try:
+
 # Recuperamos los argumentos ingresados por la consola
 num_tiradas = int(sys.argv[2])
 num_corridas = int(sys.argv[4])
@@ -27,7 +27,7 @@ for i in range(num_corridas):
   desvios_estandar = []
   for _ in range(num_tiradas):
 
-    # Simulamos el uso de la ruleta, obteniendo un valor entre 0 y 36
+    #Simulamos el uso de la ruleta, obteniendo un valor entre 0 y 36
     valor = random.randint(0, 36)
 
     #Calculamos y almacenamos los valores de las características estudiadas en cada tirada
@@ -47,6 +47,8 @@ for i in range(num_corridas):
   media_esperada = sum(list(range(0, 37))) / 37
   varianza_esperada = sum((x - media_esperada) ** 2 for x in range(0, 37)) / 37
   desvio_est_esperado = round(varianza_esperada ** 0.5, 4)
+  
+  #Elaboramos los gráficos pertinentes para comparar los valores esperados con los obtenidos
   x1 = list(range(1, num_tiradas + 1))
   fig, axs = plt.subplots(2, 2, figsize=(14, 6))
   axs[0, 0].plot(x1, [frec_relativa_esperada] * len(x1), color='blue', label="Frecuencia Relativa Esperada")
@@ -79,8 +81,3 @@ for i in range(num_corridas):
   axs[1, 1].grid(True)
   plt.tight_layout()
   plt.show()
-
-
-#except ValueError:
-#  print("El número de las tiradas, corridas y el valor elegido deben ser enteros")
-#  sys.exit(1)
