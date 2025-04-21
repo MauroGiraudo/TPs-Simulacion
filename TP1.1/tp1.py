@@ -24,8 +24,9 @@ for i in range(num_corridas):
   frec_relativas = []
   medias = []
   varianzas = []
-  desvios_cuadraticos = []
   desvios_estandar = []
+  varianzas_valor_elegido = []
+  desvios_estandar_valor_elegido = []
   for _ in range(num_tiradas):
 
     #Simulamos el uso de la ruleta, obteniendo un valor entre 0 y 36
@@ -39,9 +40,10 @@ for i in range(num_corridas):
     medias.append(round(sum(valores_corrida) / len(valores_corrida), 4))
     var = round(sum((x - medias[-1]) ** 2 for x in valores_corrida) / (len(valores_corrida)), 4)
     varianzas.append(var)
-    desv_cuadratico = round(sum((x - valor_elegido) ** 2 for x in valores_corrida) / len(valores_corrida), 4)
-    desvios_cuadraticos.append(desv_cuadratico)
     desvios_estandar.append(round(var ** 0.5, 4))
+    var_val_eleg = round(sum((x - valor_elegido) ** 2 for x in valores_corrida) / len(valores_corrida), 4)
+    varianzas_valor_elegido.append(var_val_eleg)
+    desvios_estandar_valor_elegido.append(round(var_val_eleg ** 0.5, 4))
     
   # valores.extend(valores_corrida) [SEGURAMENTE NO SE UTILICE]
 
@@ -49,18 +51,19 @@ for i in range(num_corridas):
   frec_relativa_esperada = round(1 / 37, 4)
   media_esperada = sum(list(range(0, 37))) / 37
   varianza_esperada = sum((x - media_esperada) ** 2 for x in range(0, 37)) / 37
-  desvio_cuadratico_esperado = sum((x - valor_elegido) ** 2 for x in range(0, 37)) / 37
   desvio_est_esperado = round(varianza_esperada ** 0.5, 4)
+  varianza_valor_elegido_esperada = sum((x - valor_elegido) ** 2 for x in range(0, 37)) / 37
+  desvio_estandar_valor_elegido_esperado = round(varianza_valor_elegido_esperada ** 0.5, 4)
   
   #Elaboramos los gráficos pertinentes para comparar los valores esperados con los obtenidos
   x1 = list(range(1, num_tiradas + 1))
   fig, axs = plt.subplots(3, 2, figsize=(14, 6))
   axs[0, 0].plot(x1, [frec_relativa_esperada] * len(x1), color='blue', label="Frecuencia Relativa Esperada")
   axs[0, 0].plot(x1, frec_relativas, color='purple', label=f"Frecuencia Relativa del número {valor_elegido} luego de {num_tiradas} tiradas")
-  axs[0, 0].set_title('Frecuencia relativa')
+  axs[0, 0].set_title(f'Frecuencia relativa respecto al número {valor_elegido}')
   axs[0, 0].set_xlabel('Número de tiradas')
   axs[0, 0].set_ylabel('Frecuencia relativa')
-  axs[0, 0].legend(loc='lower right')
+  axs[0, 0].legend()
   axs[0, 0].grid(True)
   axs[0, 1].plot(x1, [media_esperada] * len(x1), color='red', label="Media Esperada")
   axs[0, 1].plot(x1, medias, color='black', label=f"Media de valores luego de {num_tiradas} tiradas")
@@ -83,12 +86,19 @@ for i in range(num_corridas):
   axs[1, 1].set_ylabel('Desvio estandar')
   axs[1, 1].legend()
   axs[1, 1].grid(True)
-  axs[2, 0].plot(x1, [desvio_cuadratico_esperado] * len(x1), color='yellow', label="Desvio Cuadratico Esperado")
-  axs[2, 0].plot(x1, desvios_cuadraticos, color='pink', label=f"Desvio Cuadratico del número {valor_elegido} luego de {num_tiradas} tiradas")
-  axs[2, 0].set_title('Desvio cuadratico')
+  axs[2, 0].plot(x1, [varianza_valor_elegido_esperada] * len(x1), color='yellow', label="Desvio Cuadratico Esperado")
+  axs[2, 0].plot(x1, varianzas_valor_elegido, color='pink', label=f"Desvio Cuadratico del número {valor_elegido} luego de {num_tiradas} tiradas")
+  axs[2, 0].set_title(f'Varianza respecto al número {valor_elegido}')
   axs[2, 0].set_xlabel('Número de tiradas')
-  axs[2, 0].set_ylabel('Desvio cuadratico')
+  axs[2, 0].set_ylabel('Varianza')
   axs[2, 0].legend()
   axs[2, 0].grid(True)
+  axs[2, 1].plot(x1, [desvio_estandar_valor_elegido_esperado] * len(x1), color='purple', label="Desvio Estandar Esperado")
+  axs[2, 1].plot(x1, desvios_estandar_valor_elegido, color='blue', label=f"Desvio Estandar del número {valor_elegido} luego de {num_tiradas} tiradas")
+  axs[2, 1].set_title(f'Desvio estandar respecto al número {valor_elegido}')
+  axs[2, 1].set_xlabel('Número de tiradas')
+  axs[2, 1].set_ylabel('Desvio estandar')
+  axs[2, 1].legend()
+  axs[2, 1].grid(True)
   plt.tight_layout()
   plt.show()
