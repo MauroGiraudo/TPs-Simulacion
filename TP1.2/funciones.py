@@ -10,7 +10,7 @@ def convertir_a_color(resultado):
 
 def definir_capital(capital):
   if(capital == "finito"):
-    return 2500
+    return 500
   else:
     return 0
   
@@ -22,7 +22,15 @@ def generar_secuencia_fibonacci(tiradas):
     secuencia_fibonacci.append(secuencia_fibonacci[i-1] + secuencia_fibonacci[i-2])
   return secuencia_fibonacci
 
-
+def generar_nombre_estrategia(estrategia):
+  if(estrategia == "m"):
+    return "Martingala"
+  elif(estrategia == "a"):
+    return "D'Alembert"
+  elif(estrategia == "f"):
+    return "Fibonacci"
+  else:
+    return "Paroli" 
 
 def definir_apuesta_inicial(estrategia):
   if(estrategia == "f"):
@@ -51,7 +59,7 @@ def nuevo_valor_contador_sec_fibonacci(contador_secuencia_fibonacci, secuencia_f
 #Fibonacci:
 #   Si gana, se resta 2 a la secuencia de Fibonacci (hasta llegar al mínimo)
 #   Si pierde, se suma 1 a la secuencia de Fibonacci 
-def nuevo_valor_apuesta(estrategia, valor_minimo_apuesta, resultado_apuesta, valor_apuesta, secuencia_fibonacci, contador_secuencia_fibonacci):
+def nuevo_valor_apuesta(estrategia, valor_minimo_apuesta, resultado_apuesta, valor_apuesta, secuencia_fibonacci, contador_secuencia_fibonacci, contador_paroli):
   if(resultado_apuesta == 1):
     if(estrategia == "m"):
       return valor_minimo_apuesta
@@ -63,7 +71,10 @@ def nuevo_valor_apuesta(estrategia, valor_minimo_apuesta, resultado_apuesta, val
     elif(estrategia == "f"):
       return secuencia_fibonacci[contador_secuencia_fibonacci]
     else:
-      return valor_minimo_apuesta #Aún no se definió la última estrategia (estrategia "o")
+      if(contador_paroli <= 2):
+        return valor_apuesta * 2
+      else:
+        return valor_minimo_apuesta
   else:
     if(estrategia == "m"):
       return valor_apuesta * 2
@@ -72,7 +83,7 @@ def nuevo_valor_apuesta(estrategia, valor_minimo_apuesta, resultado_apuesta, val
     elif(estrategia == "f"):
       return secuencia_fibonacci[contador_secuencia_fibonacci]
     else:
-      return valor_minimo_apuesta #Aún no se definió la última estrategia (estrategia "o")
+      return valor_minimo_apuesta 
     
 
 
@@ -85,3 +96,12 @@ def calcular_monto_total_observado(monto_total_corridas, num_corridas, num_tirad
     promedio_monto_total_tirada = suma_monto_total_tirada / num_corridas
     monto_total_observado.append(promedio_monto_total_tirada)
   return monto_total_observado
+
+def calcular_promedio_apuestas_ganadas(resultados_apuestas_corridas):
+  resultado_apuestas_observado = []
+  suma = 0
+  for i in range(len(resultados_apuestas_corridas)):
+    suma += resultados_apuestas_corridas[i]
+    print(suma)
+    resultado_apuestas_observado.append(round(suma / (i+1), 4))
+  return resultado_apuestas_observado

@@ -1,7 +1,7 @@
 import random
 import sys
 import matplotlib.pyplot as plt
-from funciones import convertir_a_color, definir_capital, nuevo_valor_apuesta, generar_secuencia_fibonacci, definir_apuesta_inicial, nuevo_valor_contador_sec_fibonacci, calcular_monto_total_observado
+from funciones import convertir_a_color, definir_capital, nuevo_valor_apuesta, generar_secuencia_fibonacci, definir_apuesta_inicial, nuevo_valor_contador_sec_fibonacci, calcular_monto_total_observado, generar_nombre_estrategia, calcular_promedio_apuestas_ganadas
 
 
 # Validamos que la ejecución del programa sea correcta
@@ -17,14 +17,17 @@ estrategia_elegida = sys.argv[8]
 capital_disponible = sys.argv[10]
 
 # Validamos los argumentos
-if(num_tiradas <= 0 or num_corridas <= 0 or (valor_elegido != "rojo" and valor_elegido != "negro") or (estrategia_elegida != "m" and estrategia_elegida != "a" and estrategia_elegida != "f" and estrategia_elegida != "o") or (capital_disponible != "finito" and capital_disponible != "infinito")):
-  print("El número de tiradas y corridas debe ser mayor a 0, el valor elegido debe ser [rojo] o [negro], las estrategias son m(Martingala), a(D'Alembert), f(Fibonacci) u o() y el capital puede ser finito o infinito")
+if(num_tiradas <= 0 or num_corridas <= 0 or (valor_elegido != "rojo" and valor_elegido != "negro") or (estrategia_elegida != "m" and estrategia_elegida != "a" and estrategia_elegida != "f" and estrategia_elegida != "p") or (capital_disponible != "finito" and capital_disponible != "infinito")):
+  print("El número de tiradas y corridas debe ser mayor a 0, el valor elegido debe ser [rojo] o [negro], las estrategias son m(Martingala), a(D'Alembert), f(Fibonacci) u p(Paroli) y el capital puede ser finito o infinito")
   sys.exit(1)
 
 valores_corridas = []
 capital_inicial = definir_capital(capital_disponible)
+promedio_apuestas_para_ganar = round(1/(18/37), 4)
 monto_total_corridas = []
 secuencia_fibonacci = generar_secuencia_fibonacci(num_tiradas)
+resultados_apuestas_corridas = [] #Se utilizará para mostrar el promedio de apuestas que deben realizarse para lograr ganar una de ellas (respecto del total de ejecuciones / corridas de la experiencia)
+
 
 def experiencia(corridas, tiradas, eleccion, estrategia, capital_inicial):
   apuesta_inicial = definir_apuesta_inicial(estrategia)
@@ -33,7 +36,10 @@ def experiencia(corridas, tiradas, eleccion, estrategia, capital_inicial):
   for j in range(corridas):
     valores = []
     monto_total = []
+    cantidad_apuestas_ganadas = 0
+    contador_paroli = 0
     for i in range(tiradas):
+      #Si el capital es finito y el monto total es menor al valor de la apuesto, no se puede seguir apostando
       if(capital_inicial != 0 and i > 0):
         if(monto_total[-1] < apuesta):
           monto_total.append(monto_total[-1])
@@ -42,55 +48,76 @@ def experiencia(corridas, tiradas, eleccion, estrategia, capital_inicial):
       valor = random.randint(0, 1)
       resultado = convertir_a_color(valor)
       if(resultado == eleccion):
+        cantidad_apuestas_ganadas += 1
+        contador_paroli += 1
         if(i == 0):
           monto_total.append(capital_inicial + apuesta) # En la primer apuesta, sumamos al capital inicial el monto ganado
         else:
-          monto_total.append(monto_total[-1] + apuesta) # Sumamos al monto total(hasta el momento) el monto ganado
+          monto_total.append(monto_total[-1] + apuesta) # Sumamos al monto total (hasta el momento) el monto ganado
         
         # Actualizamos el contador para la estrategia de Fibonacci
         contador_secuencia_fibonacci= nuevo_valor_contador_sec_fibonacci(contador_secuencia_fibonacci, secuencia_fibonacci, 1)
         
         # Actualizamos el valor de la apuesta según la estrategia elegida
-        apuesta = nuevo_valor_apuesta(estrategia, apuesta_inicial, 1, apuesta, secuencia_fibonacci, contador_secuencia_fibonacci)
+        apuesta = nuevo_valor_apuesta(estrategia, apuesta_inicial, 1, apuesta, secuencia_fibonacci, contador_secuencia_fibonacci, contador_paroli)
 
       else:
+        contador_paroli = 0
         if(i == 0):
           monto_total.append(capital_inicial - apuesta) # En la primer apuesta, restamos al capital inicial el monto perdido
         else:
-          monto_total.append(monto_total[-1] - apuesta) #Restamos al monto total(hasta el momento) el monto perdido
+          monto_total.append(monto_total[-1] - apuesta) #Restamos al monto total (hasta el momento) el monto perdido
         
         # Actualizamos el contador para la estrategia de Fibonacci
         contador_secuencia_fibonacci = nuevo_valor_contador_sec_fibonacci(contador_secuencia_fibonacci, secuencia_fibonacci, 0) 
 
         # Actualizamos el valor de la apuesta según la estrategia elegida
-        apuesta = nuevo_valor_apuesta(estrategia, apuesta_inicial,  0, apuesta, secuencia_fibonacci, contador_secuencia_fibonacci)
+        apuesta = nuevo_valor_apuesta(estrategia, apuesta_inicial,  0, apuesta, secuencia_fibonacci, contador_secuencia_fibonacci, contador_paroli)
 
     # Almacenamos los valores de cada corrida
     valores_corridas.append(valores)
     monto_total_corridas.append(monto_total)
+    if(cantidad_apuestas_ganadas != 0):
+      resultados_apuestas_corridas.append(round(tiradas / cantidad_apuestas_ganadas, 4)) # Guardamos la cantidad de apuestas ganadas en cada corrida
+    else:
+      resultados_apuestas_corridas.append(tiradas)
 
 
 
 def elaborar_graficas(capital_inicial, estrategia_elegida):
  
- # Crear una función que devuelva el nombre completo de la estrategia empleada basado en el 
- # parámetro para ponerlo en el título de la gráfica
+ nombre_estrategia = generar_nombre_estrategia(estrategia_elegida)
 
 
  monto_total_observado = calcular_monto_total_observado(monto_total_corridas, num_corridas, num_tiradas)
+ resultado_apuestas_observado = calcular_promedio_apuestas_ganadas(resultados_apuestas_corridas)
+
+ print(resultados_apuestas_corridas)
+ print(resultado_apuestas_observado)
+
+#Graficar, además, el promedio de tiradas que se debe realizar para ganar una apuesta respecto a la cantidad de corridas de la experiencia
 
  x1 = list(range(1, num_tiradas + 1))
- plt.figure(figsize=(10, 8))
- plt.plot(x1, monto_total_observado, label="Monto total observado", color="blue")
- plt.plot(x1, [capital_inicial] * len(x1), label="Capital inicial", color="red", linestyle="--")
- plt.title("Monto total observado vs Capital inicial")
- plt.xlabel("Número de tiradas")
- plt.ylabel("Monto total")
- plt.grid(True)
- plt.legend()
-
+ x2 = list(range(1, num_corridas + 1))
+ fig, axs = plt.subplots(1, 2, figsize=(10, 7))
+ axs[0].plot(x1, monto_total_observado, label="Monto total observado", color="blue")
+ axs[0].plot(x1, [capital_inicial] * len(x1), label="Capital inicial", color="red", linestyle="--")
+ axs[0].set_title(f"Monto total observado (Estrategia: {nombre_estrategia})")
+ axs[0].set_xlabel("Número de tiradas")
+ axs[0].set_ylabel("Monto total")
+ axs[0].grid(True)
+ axs[0].legend()
+ axs[1].plot(x2, [promedio_apuestas_para_ganar] * len(x2), label="Promedio de tiradas esperado para ganar", color="purple", linestyle="--")
+ axs[1].plot(x2, resultado_apuestas_observado, label="Promedio de tiradas observado para ganar", color="green")
+ axs[1].set_title("Promedio de tiradas para ganar una apuesta")
+ axs[1].set_xlabel("Número de corridas")
+ axs[1].set_ylabel("Promedio de tiradas")
+ axs[1].grid(True)
+ axs[1].legend()
  plt.tight_layout()
  plt.show()
 
+
 experiencia(num_corridas, num_tiradas, valor_elegido, estrategia_elegida, capital_inicial)
 elaborar_graficas(capital_inicial, estrategia_elegida)
+
