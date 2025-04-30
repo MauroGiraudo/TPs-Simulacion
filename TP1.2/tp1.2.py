@@ -122,13 +122,12 @@ def elaborar_graficas(capital_inicial, estrategia_elegida):
  
  nombre_estrategia = generar_nombre_estrategia(estrategia_elegida)
 
-
  monto_total_observado = calcular_monto_total_observado(monto_total_corridas, num_corridas, num_tiradas)
 
  frec_relativa_victoria_observada = calcular_frec_relativa_victoria_observada(frec_rel_victoria_corridas)
 
- print(frec_rel_victoria_corridas)
- print(frec_relativa_victoria_observada)
+ #print(frec_rel_victoria_corridas)
+ #print(frec_relativa_victoria_observada)
 
  resultado_apuestas_observado = calcular_promedio_apuestas_ganadas(resultados_apuestas_corridas)
 
@@ -160,13 +159,15 @@ def elaborar_graficas(capital_inicial, estrategia_elegida):
  axs[1, 0].set_ylabel("Frecuencia relativa")
  axs[1, 0].grid(True)
  axs[1, 0].legend()
- axs[1, 1].plot(x2, frec_bancarrota_observada, label="Frecuencia de bancarrota observada", color="orange")
- axs[1, 1].set_title("Frecuencia de bancarrota observada")
- axs[1, 1].set_xlabel("Número de corridas")
- axs[1, 1].set_ylabel("Frecuencia de bancarrota")
- axs[1, 1].grid(True)
- axs[1, 1].legend()
+ if(capital_disponible == "finito"):
+   axs[1, 1].plot(x2, frec_bancarrota_observada, label="Frecuencia de bancarrota observada", color="orange")
+   axs[1, 1].set_title("Frecuencia de bancarrota observada")
+   axs[1, 1].set_xlabel("Número de corridas")
+   axs[1, 1].set_ylabel("Frecuencia de bancarrota")
+   axs[1, 1].grid(True)
+   axs[1, 1].legend()
  plt.tight_layout()
+ #plt.savefig(f"resultados_{nombre_estrategia}_tir{num_tiradas}_ejec{num_corridas}_{capital_disponible}.png")
  plt.show()
 
 

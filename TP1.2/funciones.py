@@ -75,8 +75,8 @@ def nuevo_valor_apuesta(estrategia, valor_minimo_apuesta, resultado_apuesta, val
     if(estrategia == "m"):
       return valor_minimo_apuesta
     elif(estrategia == "a"):
-      if(valor_apuesta - 10 > valor_minimo_apuesta):
-        return valor_apuesta - 10
+      if(valor_apuesta - 15 > valor_minimo_apuesta):
+        return valor_apuesta - 15
       else:
         return valor_minimo_apuesta
     elif(estrategia == "f"):
