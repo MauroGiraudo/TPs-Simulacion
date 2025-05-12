@@ -142,6 +142,10 @@ def calcular_frec_bancarrota_observada(bancarrota_corridas):
   return frec_bancarrota_observada
 
 
+
+
+
+
 # Validamos que la ejecución del programa sea correcta
 if(len(sys.argv) != 11 or sys.argv[1] != '-c' or sys.argv[3] != '-n' or sys.argv[5] != '-z' or sys.argv[7] != '-s' or sys.argv[9] != '-a'):
   print("Uso: python tp1.py -c <numero_tiradas> -n <numero_corridas> -z <valor_elegido> -s <estrategia> -a <capital>")
