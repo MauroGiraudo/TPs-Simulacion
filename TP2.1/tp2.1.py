@@ -43,7 +43,7 @@ def crear_bitmap(resultado, ancho, alto, tipo_generador):
     matriz = np.array(valores_normalizados[:ancho * alto]).reshape((alto, ancho))
 
     plt.imshow(matriz, cmap='gray', interpolation='nearest')
-    plt.title("Bitmap generado")
+    plt.title(f"Bitmap generado ({tipo_generador})")
     plt.axis('off')
     #plt.imsave(f'bitmap_{tipo_generador}.png', matriz, cmap='gray', format='png')
     plt.show()
