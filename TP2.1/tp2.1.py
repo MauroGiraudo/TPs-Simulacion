@@ -56,7 +56,7 @@ def crear_bitmap(resultado, ancho, alto, tipo_generador):
 
 def generador_lineal_congruencial(semilla):
   m = cantidad_numeros**2
-  a = generar_valor_a(cantidad_numeros) #El valor ingresado debe ser un número entero
+  a = generar_valor_a(cantidad_numeros-3) #El valor ingresado debe ser un número entero
   c = 7
   if(not son_coprimos(c, m)):
     print("El Módulo (m) y el Incremento (c) no son coprimos (divisor máximo = 1 entre si)")
@@ -67,6 +67,13 @@ def generador_lineal_congruencial(semilla):
     valores.append(x)
     semilla = x
   return valores
+
+
+def generador_python(semilla):
+  random.seed(semilla)
+  valores = [random.randint(0, cantidad_numeros**2) for _ in range(cantidad_numeros**2)]
+  return valores
+  
 
 # Test de Frecuencia
 
@@ -163,10 +170,10 @@ def test_mayor_secuencia_unos(valores, tamanio_bloque): #Sólo para M = 128
         secuencia_actual = 0
     secuencias_maximas.append(secuencia_máxima)
 
-  print(secuencias_maximas)
+  #print(secuencias_maximas)
 
   # Categorizar las longitudes de las secuencias de 1's
-  categorias = [4, 5, 6, 7]  
+  categorias = [4, 5, 6, 7, 8, 9]  
   conteo_observaciones = [0] * len(categorias)
   for secuencia in secuencias_maximas:
     #print(secuencia)
@@ -176,10 +183,14 @@ def test_mayor_secuencia_unos(valores, tamanio_bloque): #Sólo para M = 128
         break
       if secuencia > categorias[-1]:
         conteo_observaciones[-1] += 1
+        break
+      if secuencia < categorias[0]:
+        conteo_observaciones[0] += 1
+        break
 
-  print(conteo_observaciones)
+  #print(conteo_observaciones)
   # Frecuencias esperadas (valores teóricos para una secuencia aleatoria) 
-  probabilidades_esperadas = [0.1174, 0.2430, 0.2493, 0.3903]  
+  probabilidades_esperadas = [0.1174, 0.2430, 0.2493, 0.1752, 0.1027, 0.1124]  
   conteo_esperado = [p * cant_bloques for p in probabilidades_esperadas]
 
   # Ajustar las frecuencias esperadas si las sumas no coinciden
@@ -219,24 +230,24 @@ def test_plantillas_sin_superposicion(valores, plantilla, tamanio_bloque):
 
     # Contar las apariciones de la plantilla en cada bloque
     longitud_plantilla = len(plantilla)
-    observed_counts = []
-    for block in bloques:
+    valores_observados = []
+    for bloque in bloques:
         count = 0
-        for i in range(len(block) - longitud_plantilla + 1):
-            if block[i:i + longitud_plantilla] == plantilla:
+        for i in range(len(bloque) - longitud_plantilla + 1):
+            if bloque[i:i + longitud_plantilla] == plantilla:
                 count += 1
-        observed_counts.append(count)
+        valores_observados.append(count)
 
     #print(observed_counts)
     # Calcular la frecuencia esperada y la varianza
-    expected_mean = (tamanio_bloque - longitud_plantilla + 1) * (2 ** -longitud_plantilla)
-    expected_variance = tamanio_bloque * (2 ** -longitud_plantilla - 2**(-2*longitud_plantilla) * (2 * longitud_plantilla - 1))
+    media_esperada = (tamanio_bloque - longitud_plantilla + 1) * (2 ** -longitud_plantilla)
+    varianza_esperada = tamanio_bloque * (2 ** -longitud_plantilla - 2**(-2*longitud_plantilla) * (2 * longitud_plantilla - 1))
 
     # Calcular el estadístico chi-cuadrado manualmente
-    chi_stat = np.sum([(x - expected_mean)**2 / expected_variance for x in observed_counts])
+    chi_stat = np.sum([(x - media_esperada)**2 / varianza_esperada for x in valores_observados])
 
     # Calcular el p-value usando la distribución chi-cuadrado
-    grados_de_libertad = len(observed_counts)  
+    grados_de_libertad = len(valores_observados)  
     p_value = 1 - chi2.cdf(chi_stat, df=grados_de_libertad)
 
     return p_value
@@ -247,7 +258,7 @@ resultado_medios_cuadrados = generador_medios_cuadrados(semilla)
 #print(resultado_medios_cuadrados)
 
 # Mapa de bits donde podemos observar visualmente la distribución de los valores generados
-#crear_bitmap(resultado_medios_cuadrados, ancho=cantidad_numeros, alto=cantidad_numeros, tipo_generador="medios_cuadrados")
+crear_bitmap(resultado_medios_cuadrados, ancho=cantidad_numeros, alto=cantidad_numeros, tipo_generador="medios_cuadrados")
 
 # Resultado Test de Frecuencia
 resultado_test_frecuencia1 = test_frecuencia_bloque(resultado_medios_cuadrados, tamanio_bloque)
@@ -262,7 +273,7 @@ resultado_test_mayor_secuencia1 = test_mayor_secuencia_unos(resultado_medios_cua
 print(f"MS:{resultado_test_mayor_secuencia1}")
 
 # Resultado Test de Plantillas sin Superposición
-resultado_test_plantillas1 = test_plantillas_sin_superposicion(resultado_medios_cuadrados, '101', tamanio_bloque)
+resultado_test_plantillas1 = test_plantillas_sin_superposicion(resultado_medios_cuadrados, '100', tamanio_bloque)
 print(f"PS:{resultado_test_plantillas1}")
 
 
@@ -272,7 +283,7 @@ resultado_gcl = generador_lineal_congruencial(semilla)
 #print(resultado_gcl)
 
 # Mapa de bits donde podemos observar visualmente la distribución de los valores generados
-#crear_bitmap(resultado_gcl, ancho=cantidad_numeros, alto=cantidad_numeros, tipo_generador="lineal_congruencial")
+crear_bitmap(resultado_gcl, ancho=cantidad_numeros, alto=cantidad_numeros, tipo_generador="lineal_congruencial")
 
 # Resultado Test de Frecuencia
 resultado_test_frecuencia2 = test_frecuencia_bloque(resultado_gcl, tamanio_bloque)
@@ -287,8 +298,31 @@ resultado_test_mayor_secuencia2 = test_mayor_secuencia_unos(resultado_gcl, taman
 print(f"MS:{resultado_test_mayor_secuencia2}")
 
 # Resultado Test de Plantillas sin Superposición
-resultado_test_plantillas2 = test_plantillas_sin_superposicion(resultado_gcl, '101', tamanio_bloque)
+resultado_test_plantillas2 = test_plantillas_sin_superposicion(resultado_gcl, '100', tamanio_bloque)
 print(f"PS:{resultado_test_plantillas2}")
+
+# Valores aleatorios obtenido con el generador de python
+resultado_python = generador_python(semilla)
+#print(resultado_python)
+
+# Mapa de bits donde podemos observar visualmente la distribución de los valores generados
+crear_bitmap(resultado_python, ancho=cantidad_numeros, alto=cantidad_numeros, tipo_generador="python")
+
+# Resultado Test de Frecuencia
+resultado_test_frecuencia3 = test_frecuencia_bloque(resultado_python, tamanio_bloque)
+print(f"F:{resultado_test_frecuencia3}")
+
+# Resultado Test de Suma Acumulada
+resultado_test_suma_acumulada3 = test_suma_acumulada(resultado_python)
+print(f"SA:{resultado_test_suma_acumulada3}")
+
+# Resultado Test de Mayor Secuencia de 1's
+resultado_test_mayor_secuencia3 = test_mayor_secuencia_unos(resultado_python, tamanio_bloque)
+print(f"MS:{resultado_test_mayor_secuencia3}")
+
+# Resultado Test de Plantillas sin Superposición
+resultado_test_plantillas3 = test_plantillas_sin_superposicion(resultado_python, '100', tamanio_bloque)
+print(f"PS:{resultado_test_plantillas3}")
 
 # Creación de una tabla donde mostramos los resultados de los tests para los generadores creados
 """
@@ -315,5 +349,6 @@ def mostrar_resultados_en_tabla(resultados_tests):
 # Tabla donde podemos observar el resultado de los tests ejecutados para ambos generadores
 datos_metodo_cuadrados = ["Método de los Cuadrados", evaluar_test(resultado_test_frecuencia1), evaluar_test(resultado_test_suma_acumulada1), evaluar_test(resultado_test_mayor_secuencia1), evaluar_test(resultado_test_plantillas1)]
 datos_gcl = ["GCL", evaluar_test(resultado_test_frecuencia2), evaluar_test(resultado_test_suma_acumulada2), evaluar_test(resultado_test_mayor_secuencia2), evaluar_test(resultado_test_plantillas2)]
-datos = [datos_metodo_cuadrados, datos_gcl]
+datos_python = ["Python", evaluar_test(resultado_test_frecuencia3), evaluar_test(resultado_test_suma_acumulada3), evaluar_test(resultado_test_mayor_secuencia3), evaluar_test(resultado_test_plantillas3)]
+datos = [datos_metodo_cuadrados, datos_gcl, datos_python]
 mostrar_resultados_en_tabla(datos)
