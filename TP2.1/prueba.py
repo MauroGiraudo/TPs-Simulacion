@@ -15,10 +15,12 @@ def generar_valor_binario(n):
     sum += int(x[i])
 
   bin_final = 0 if (sum % 2) == 0 else 1
-  print(f"Valor binario: {x}  |  Suma: {sum}  |  Binario Final: {bin_final}")
+  #print(f"Valor binario: {x}  |  Suma: {sum}  |  Binario Final: {bin_final}")
 
   return bin_final
 
 nuevos_valores = [generar_valor_binario(x) for x in valores]
 
 print(nuevos_valores)
+
+print(son_coprimos(7, 2**32))

@@ -17,8 +17,8 @@ if(len(sys.argv[2]) != 4):
 
 # Definimos las variables globales necesarias 
 semilla = int(sys.argv[2])
-cantidad_numeros = 2**5
-tamanio_bloque = 2**7
+cantidad_numeros = 2**5 #Altura - Ancho de los bitmaps y sqrt() de la longitud de las secuencias aleatorias
+tamanio_bloque = 2**7 # M 
 
 def generador_medios_cuadrados(semilla):
   valores = []
@@ -55,14 +55,14 @@ def crear_bitmap(resultado, ancho, alto, tipo_generador):
 # Semilla  0 <= X(0) <= m
 
 def generador_lineal_congruencial(semilla):
-  m = cantidad_numeros**2
-  a = generar_valor_a(cantidad_numeros-3) #El valor ingresado debe ser un número entero
-  c = 7
+  m = 2**32
+  a = generar_valor_a(659) #El valor ingresado debe ser un número entero
+  c = 7919
   if(not son_coprimos(c, m)):
     print("El Módulo (m) y el Incremento (c) no son coprimos (divisor máximo = 1 entre si)")
     sys.exit(1)
   valores = []
-  for i in range(cantidad_numeros**2):
+  for _ in range(cantidad_numeros**2):
     x = (a * semilla + c) % m
     valores.append(x)
     semilla = x
@@ -71,9 +71,14 @@ def generador_lineal_congruencial(semilla):
 
 def generador_python(semilla):
   random.seed(semilla)
-  valores = [random.randint(0, cantidad_numeros**2) for _ in range(cantidad_numeros**2)]
+  valores = [random.randint(0, 75000) for _ in range(cantidad_numeros**2)]
   return valores
   
+def generador_numpy(semilla):
+   np.random.seed(semilla)
+   valores = np.random.randint(0, 75000, size=(cantidad_numeros**2))
+   return valores.tolist()
+
 
 # Test de Frecuencia
 
@@ -262,19 +267,19 @@ crear_bitmap(resultado_medios_cuadrados, ancho=cantidad_numeros, alto=cantidad_n
 
 # Resultado Test de Frecuencia
 resultado_test_frecuencia1 = test_frecuencia_bloque(resultado_medios_cuadrados, tamanio_bloque)
-print(f"F:{resultado_test_frecuencia1}")
+print(f"F - MC:{resultado_test_frecuencia1}")
 
 # Resultado Test de Suma Acumulada
 resultado_test_suma_acumulada1 = test_suma_acumulada(resultado_medios_cuadrados)
-print(f"SA:{resultado_test_suma_acumulada1}")
+print(f"SA - MC:{resultado_test_suma_acumulada1}")
 
 # Resultado Test de Mayor Secuencia de 1's
 resultado_test_mayor_secuencia1 = test_mayor_secuencia_unos(resultado_medios_cuadrados, tamanio_bloque)
-print(f"MS:{resultado_test_mayor_secuencia1}")
+print(f"MS - MC:{resultado_test_mayor_secuencia1}")
 
 # Resultado Test de Plantillas sin Superposición
 resultado_test_plantillas1 = test_plantillas_sin_superposicion(resultado_medios_cuadrados, '100', tamanio_bloque)
-print(f"PS:{resultado_test_plantillas1}")
+print(f"PS - MC:{resultado_test_plantillas1}")
 
 
 
@@ -287,19 +292,21 @@ crear_bitmap(resultado_gcl, ancho=cantidad_numeros, alto=cantidad_numeros, tipo_
 
 # Resultado Test de Frecuencia
 resultado_test_frecuencia2 = test_frecuencia_bloque(resultado_gcl, tamanio_bloque)
-print(f"F:{resultado_test_frecuencia2}")
+print(f"F - GCL:{resultado_test_frecuencia2}")
 
 # Resultado Test de Suma Acumulada
 resultado_test_suma_acumulada2 = test_suma_acumulada(resultado_gcl)
-print(f"SA:{resultado_test_suma_acumulada2}")
+print(f"SA - GCL:{resultado_test_suma_acumulada2}")
 
 # Resultado Test de Mayor Secuencia de 1's
 resultado_test_mayor_secuencia2 = test_mayor_secuencia_unos(resultado_gcl, tamanio_bloque)
-print(f"MS:{resultado_test_mayor_secuencia2}")
+print(f"MS - GCL:{resultado_test_mayor_secuencia2}")
 
 # Resultado Test de Plantillas sin Superposición
 resultado_test_plantillas2 = test_plantillas_sin_superposicion(resultado_gcl, '100', tamanio_bloque)
-print(f"PS:{resultado_test_plantillas2}")
+print(f"PS - GCL:{resultado_test_plantillas2}")
+
+
 
 # Valores aleatorios obtenido con el generador de python
 resultado_python = generador_python(semilla)
@@ -310,19 +317,45 @@ crear_bitmap(resultado_python, ancho=cantidad_numeros, alto=cantidad_numeros, ti
 
 # Resultado Test de Frecuencia
 resultado_test_frecuencia3 = test_frecuencia_bloque(resultado_python, tamanio_bloque)
-print(f"F:{resultado_test_frecuencia3}")
+print(f"F - PY:{resultado_test_frecuencia3}")
 
 # Resultado Test de Suma Acumulada
 resultado_test_suma_acumulada3 = test_suma_acumulada(resultado_python)
-print(f"SA:{resultado_test_suma_acumulada3}")
+print(f"SA - PY:{resultado_test_suma_acumulada3}")
 
 # Resultado Test de Mayor Secuencia de 1's
 resultado_test_mayor_secuencia3 = test_mayor_secuencia_unos(resultado_python, tamanio_bloque)
-print(f"MS:{resultado_test_mayor_secuencia3}")
+print(f"MS - PY:{resultado_test_mayor_secuencia3}")
 
 # Resultado Test de Plantillas sin Superposición
 resultado_test_plantillas3 = test_plantillas_sin_superposicion(resultado_python, '100', tamanio_bloque)
-print(f"PS:{resultado_test_plantillas3}")
+print(f"PS - PY:{resultado_test_plantillas3}")
+
+
+
+# Valores aleatorios obtenido con el generador de numpy
+resultado_numpy = generador_numpy(semilla)
+#print(resultado_numpy)
+
+# Mapa de bits donde podemos observar visualmente la distribución de los valores generados
+crear_bitmap(resultado_numpy, ancho=cantidad_numeros, alto=cantidad_numeros, tipo_generador="numpy")
+
+# Resultado Test de Frecuencia
+resultado_test_frecuencia4 = test_frecuencia_bloque(resultado_numpy, tamanio_bloque)
+print(f"F - NUMPY:{resultado_test_frecuencia4}")
+
+# Resultado Test de Suma Acumulada
+resultado_test_suma_acumulada4 = test_suma_acumulada(resultado_numpy)
+print(f"SA - NUMPY:{resultado_test_suma_acumulada4}")
+
+# Resultado Test de Mayor Secuencia de 1's
+resultado_test_mayor_secuencia4 = test_mayor_secuencia_unos(resultado_numpy, tamanio_bloque)
+print(f"MS - NUMPY:{resultado_test_mayor_secuencia4}")
+
+# Resultado Test de Plantillas sin Superposición
+resultado_test_plantillas4 = test_plantillas_sin_superposicion(resultado_numpy, '100', tamanio_bloque)
+print(f"PS - NUMPY:{resultado_test_plantillas4}")
+
 
 # Creación de una tabla donde mostramos los resultados de los tests para los generadores creados
 """
@@ -350,5 +383,6 @@ def mostrar_resultados_en_tabla(resultados_tests):
 datos_metodo_cuadrados = ["Método de los Cuadrados", evaluar_test(resultado_test_frecuencia1), evaluar_test(resultado_test_suma_acumulada1), evaluar_test(resultado_test_mayor_secuencia1), evaluar_test(resultado_test_plantillas1)]
 datos_gcl = ["GCL", evaluar_test(resultado_test_frecuencia2), evaluar_test(resultado_test_suma_acumulada2), evaluar_test(resultado_test_mayor_secuencia2), evaluar_test(resultado_test_plantillas2)]
 datos_python = ["Python", evaluar_test(resultado_test_frecuencia3), evaluar_test(resultado_test_suma_acumulada3), evaluar_test(resultado_test_mayor_secuencia3), evaluar_test(resultado_test_plantillas3)]
-datos = [datos_metodo_cuadrados, datos_gcl, datos_python]
+datos_numpy = ["Numpy", evaluar_test(resultado_test_frecuencia4), evaluar_test(resultado_test_suma_acumulada4), evaluar_test(resultado_test_mayor_secuencia4), evaluar_test(resultado_test_plantillas4)]
+datos = [datos_metodo_cuadrados, datos_gcl, datos_python, datos_numpy]
 mostrar_resultados_en_tabla(datos)
