@@ -58,6 +58,7 @@ if(distribucion != 'u' and distribucion != 'e' and distribucion != 'n' and distr
     sys.exit(1)
 
 def generar_valores(distribucion):
+  valores = []
   if(distribucion == 'u'):
     #Distribución Uniforme
     
@@ -70,11 +71,12 @@ def generar_valores(distribucion):
     a, b = 0, 1
     n = 100000
 
-    muestras2  = [uniforme(a, b) for _ in range(n)]
+    resultados_uniforme  = [uniforme(a, b) for _ in range(n)]
+    valores.extend(resultados_uniforme)
 
     # Visualización
 
-    plt.hist(muestras2, bins=100, density=True, alpha=0.6, label='Muestras (inversa)')
+    plt.hist(resultados_uniforme, bins=100, density=True, alpha=0.6, label='Muestras (inversa)')
 
     plt.plot([a, b], [1/(b-a), 1/(b-a)], 'r-', label='Densidad uniforme teórica')
     plt.legend()
@@ -91,13 +93,13 @@ def generar_valores(distribucion):
 
     u = np.random.rand(n)
 
-    exp_samples = -np.log(u) / lambd
+    resultados_exponencial = -np.log(u) / lambd
 
-    x = np.linspace(0, np.max(exp_samples), 100000)
+    x = np.linspace(0, np.max(resultados_exponencial), 100000)
     pdf = lambd * np.exp(-lambd * x)
 
     plt.figure(figsize=(10, 6))
-    plt.hist(exp_samples, bins=50, density=True, alpha=0.6, color='orange', label='Muestras generadas')
+    plt.hist(resultados_exponencial, bins=50, density=True, alpha=0.6, color='orange', label='Muestras generadas')
     plt.plot(x, pdf, 'r-', label='Distribución exponencial teórica')
     plt.title('Generador de números pseudoaleatorios - Distribución Exponencial\n(método de la función inversa)')
     plt.xlabel('Valor')
@@ -237,5 +239,44 @@ def generar_valores(distribucion):
     plt.legend()
     plt.title("Empírica Discreta")
     plt.show()
+  return valores
 
-generar_valores(distribucion)
+numeros_aleatorios = generar_valores(distribucion)
+
+def evaluar_test(resultado):
+   if(resultado < 0.01):
+      return "FALSE"
+   else:
+      return "TRUE"
+
+## Funciones para los tests
+
+
+
+## Funciones para los tests
+
+resultados_test_frecuencia = 
+
+resultado_test_suma_acumulada = 
+
+def mostrar_resultados_en_tabla(resultados_tests):
+
+    fig, ax = plt.subplots(figsize=(12.5, len(resultados_tests) * 0.5))
+    ax.axis('tight')
+    ax.axis('off')
+
+    # Crear la tabla
+    tabla = plt.table(cellText=resultados_tests,
+                      colLabels=["Distribución", "Test1: Frecuencia(bloques)", "Test2: Suma Acumulada"],
+                      loc='center',
+                      cellLoc='center')
+
+    tabla.auto_set_font_size(False)
+    tabla.set_fontsize(10)
+    tabla.auto_set_column_width(col=list(range(len(resultados_tests[0]))))
+
+    plt.show()
+
+datos_distribucion = [generar_nombre_distribucion(distribucion), evaluar_test(resultados_test_frecuencia), evaluar_test(resultado_test_suma_acumulada)]
+
+mostrar_resultados_en_tabla(datos_distribucion)
