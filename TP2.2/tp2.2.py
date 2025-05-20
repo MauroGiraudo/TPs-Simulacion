@@ -29,6 +29,28 @@ if(len(sys.argv) != 3 or sys.argv[1] != '-d'):
 
 distribucion = sys.argv[2]
 
+def generar_nombre_distribucion(distribucion):
+    if(distribucion == 'u'):
+        return 'Distribución Uniforme'
+    elif(distribucion == 'e'):
+        return 'Distribución Exponencial'
+    elif(distribucion == 'n'):
+        return 'Distribución Normal'
+    elif(distribucion == 'g'):
+        return 'Distribución Gamma'
+    elif(distribucion == 'p'):
+        return 'Distribución Pascal'
+    elif(distribucion == 'b'):
+        return 'Distribución Binomial'
+    elif(distribucion == 'h'):
+        return 'Distribución Hipergeométrica'
+    elif(distribucion == 'po'):
+        return 'Distribución Poisson'
+    elif(distribucion == 'ed'):
+        return 'Distribución Empírica Discreta'
+
+nombre_distribucion = generar_nombre_distribucion(distribucion)
+
 print(distribucion)
 
 if(distribucion != 'u' and distribucion != 'e' and distribucion != 'n' and distribucion != 'g' and distribucion != 'p' and distribucion != 'b' and distribucion != 'h' and distribucion != 'po' and distribucion != 'ed'):
