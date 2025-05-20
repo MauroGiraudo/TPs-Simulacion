@@ -268,9 +268,9 @@ def generar_valor_binario(n):
 
 ## Funciones para los tests
 
-resultados_test_frecuencia = 
+#resultados_test_frecuencia = 
 
-resultado_test_suma_acumulada = 
+#resultado_test_suma_acumulada = 
 
 def mostrar_resultados_en_tabla(resultados_tests):
 
