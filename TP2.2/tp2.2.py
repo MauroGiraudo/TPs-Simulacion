@@ -251,6 +251,19 @@ def evaluar_test(resultado):
 
 ## Funciones para los tests
 
+def generar_valor_binario(n):
+   n = str(bin(n))
+   n = n.split('b')
+   n = n[1]
+
+   sum = 0
+   for i in range(len(n)):
+      sum += int(n[i])
+   
+   bin_final = 0 if (sum % 2) == 0 else 1
+   
+   return bin_final
+
 
 
 ## Funciones para los tests
