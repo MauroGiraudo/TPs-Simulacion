@@ -335,7 +335,7 @@ resultado_test_suma_acumulada = test_suma_acumulada(numeros_aleatorios)
 
 def mostrar_resultados_en_tabla(resultados_tests):
 
-    fig, ax = plt.subplots(figsize=(12.5, len(resultados_tests) * 0.5))
+    fig, ax = plt.subplots(figsize=(8, len(resultados_tests) * 0.5))
     ax.axis('tight')
     ax.axis('off')
 
