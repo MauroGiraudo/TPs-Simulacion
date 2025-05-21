@@ -90,7 +90,7 @@ def generar_valores(distribucion):
   elif(distribucion == 'n'):
     
     # Distribución Normal
-    
+
     mu = 0       # media
     sigma = 1    # desviación estándar
     n = 2**16    # cantidad de números aleatorios
@@ -114,7 +114,7 @@ def generar_valores(distribucion):
     valores.extend(normal_samples)
 
   elif(distribucion == 'g'):
-    # Distribución Gamma (función inversa)
+
     k, theta = 2, 3
     n = 2**16
     u = np.random.rand(n)
@@ -132,7 +132,7 @@ def generar_valores(distribucion):
     valores.extend(muestras_gamma)
 
   elif(distribucion == 'p'):
-    # Distribución Pascal
+
     r, p_pascal = 5, 0.4
     n = 2**16
     u = np.random.rand(n)
@@ -150,7 +150,7 @@ def generar_valores(distribucion):
     valores.extend(muestras_pascal)
 
   elif(distribucion == 'b'):
-    # Distribución Binomial
+
     n_bin, p_bin = 10, 0.5
     n = 2**16
     u = np.random.rand(n)
@@ -169,7 +169,6 @@ def generar_valores(distribucion):
 
   elif(distribucion == 'h'):
 
-    # Distribución Hipergeométrica
     N, K, n_hip = 50, 10, 5
     n = 2**16
     u = np.random.rand(n)
@@ -189,7 +188,6 @@ def generar_valores(distribucion):
 
   elif(distribucion == 'po'):
 
-    # Distribución Poisson
     mu = 3
     n = 2**16
     u = np.random.rand(n)
@@ -207,7 +205,7 @@ def generar_valores(distribucion):
     valores.extend(muestras_poisson)
 
   elif(distribucion == 'ed'):
-    # Distribución Empírica Discreta
+
     valores_empirica = [1, 2, 3]
     probs_empirica = [0.2, 0.5, 0.3]
     n = 2**16
@@ -245,7 +243,7 @@ def evaluar_test(resultado):
 
 def generar_valor_binario(n):
   if isinstance(n, float):
-    n = int(n * 1e6)  # Escala y trunca, puedes ajustar el factor
+    n = int(n * 1e6)  
   n = str(bin(n)) 
   n = n.split('b')
   n = n[1]
@@ -261,8 +259,7 @@ def generar_valor_binario(n):
 
 #test frecuencia 
 def test_frecuencia_bloque(valores, tamanio_bloque): 
-    # Convertir la secuencia a bits (0s y 1s)
-    #secuencia_bits = [int(bin(x)[-1]) for x in valores]  # Tomar el último bit de cada número
+    # Convertimos la secuencia a bits (0s y 1s)
     secuencia_bits = [generar_valor_binario(x) for x in valores] # El bit generado depende de la paridad de 1's
 
     # Dividir la secuencia en bloques
@@ -292,8 +289,7 @@ def test_frecuencia_bloque(valores, tamanio_bloque):
 #Test suma acumulada
 def test_suma_acumulada(valores):
    
-   # Convertir la secuencia a bits (0s y 1s)
-    #secuencia_bits = [int(bin(x)[-1]) for x in valores]  # Tomar el último bit de cada número
+   # Convertimos la secuencia a bits (0s y 1s)
     secuencia_bits = [generar_valor_binario(x) for x in valores] # El bit generado depende de la paridad de 1's
 
     # Transformar los bits: 0 -> -1, 1 -> +1
@@ -312,33 +308,32 @@ def test_suma_acumulada(valores):
     return p_value
 
 def generar_pmf_dist_discretas(distribucion):
-    # Devuelve la función PMF, kmin y kmax para el test chi-cuadrado
     if distribucion == 'p':
-        # Pascal (binomial negativa)
+
         r, p_pascal = 5, 0.4
         pmf = lambda k: nbinom.pmf(k, r, p_pascal)
         kmin, kmax = 0, int(nbinom.ppf(0.999, r, p_pascal))
         return pmf, kmin, kmax
     elif distribucion == 'b':
-        # Binomial
+
         n_bin, p_bin = 10, 0.5
         pmf = lambda k: binom.pmf(k, n_bin, p_bin)
         kmin, kmax = 0, n_bin
         return pmf, kmin, kmax
     elif distribucion == 'h':
-        # Hipergeométrica
+
         N, K, n_hip = 50, 10, 5
         pmf = lambda k: hypergeom.pmf(k, N, K, n_hip)
         kmin, kmax = max(0, n_hip+K-N), min(n_hip, K)
         return pmf, kmin, kmax
     elif distribucion == 'po':
-        # Poisson
+
         mu = 3
         pmf = lambda k: poisson.pmf(k, mu)
         kmin, kmax = 0, int(poisson.ppf(0.999, mu))
         return pmf, kmin, kmax
     elif distribucion == 'ed':
-        # Empírica Discreta
+
         valores_empirica = [1, 2, 3]
         probs_empirica = [0.2, 0.5, 0.3]
         pmf = lambda k: probs_empirica[valores_empirica.index(k)] if k in valores_empirica else 0
@@ -353,8 +348,10 @@ def test_chi_cuadrado(valores, pmf, kmin, kmax, bins=None):
     if bins is None:
         bins = np.arange(kmin, kmax+2)
     obs, _ = np.histogram(valores, bins=bins)
+
     # Calcular frecuencias esperadas
     esperadas = [pmf(k) * len(valores) for k in range(kmin, kmax+1)]
+
     # Eliminar categorías con frecuencia esperada muy baja (<5)
     obs_filtrado = []
     esp_filtrado = []
@@ -362,33 +359,31 @@ def test_chi_cuadrado(valores, pmf, kmin, kmax, bins=None):
         if e >= 5:
             obs_filtrado.append(o)
             esp_filtrado.append(e)
+    
     # Normalizar esperadas para que sumen igual que observadas
     suma_obs = sum(obs_filtrado)
     suma_esp = sum(esp_filtrado)
     if suma_esp > 0:
         esp_filtrado = [e * suma_obs / suma_esp for e in esp_filtrado]
+    
     # Test chi-cuadrado
     chi2, p_value = chisquare(obs_filtrado, f_exp=esp_filtrado)
     return p_value
 
 def generar_cdf_dist_continuas(distribucion):
-   # Devuelve la función CDF y los parámetros para el test KS
+
     if distribucion == 'u':
-        # Uniforme en [a, b]
         a, b = 0, 1
-        return (lambda x, *args: (x - a) / (b - a)), a, b  # CDF manual
+        return (lambda x, *args: (x - a) / (b - a)), a, b  
     elif distribucion == 'e':
-        # Exponencial con lambda=1
         lambd = 1
-        return expon.cdf, 0, 1/lambd  # loc=0, scale=1/lambda
+        return expon.cdf, 0, 1/lambd  
     elif distribucion == 'n':
-        # Normal estándar
         mu, sigma = 0, 1
         return norm.cdf, mu, sigma
     elif distribucion == 'g':
-        # Gamma con k=2, theta=3
         k, theta = 2, 3
-        return gamma.cdf, k, 0, theta  # a, loc, scale
+        return gamma.cdf, k, 0, theta 
     else:
         raise ValueError("Distribución continua no soportada para test KS")
 
