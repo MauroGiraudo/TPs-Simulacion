@@ -2,25 +2,7 @@ import random
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.stats import gamma, nbinom, binom, hypergeom, poisson, norm, expon, chisquare
-
-def metodo_rechazo_continuo(f, a, b, M, n):
-    muestras = []
-    while len(muestras) < n:
-        x = random.uniform(a, b)
-        y = random.uniform(0, M)
-        if y < f(x):
-            muestras.append(x)
-    return muestras
-
-def metodo_rechazo_discreto(pmf, kmin, kmax, M, n):
-    muestras = []
-    while len(muestras) < n:
-        x = random.randint(kmin, kmax)
-        y = random.uniform(0, M)
-        if y < pmf(x):
-            muestras.append(x)
-    return muestras
+from scipy.stats import gamma, nbinom, binom, hypergeom, poisson, norm, expon, chisquare, kstest
 
 # Validamos que la ejecución del programa sea correcta
 if(len(sys.argv) != 3 or sys.argv[1] != '-d'):
@@ -50,8 +32,6 @@ def generar_nombre_distribucion(distribucion):
         return 'Distribución Empírica Discreta'
 
 nombre_distribucion = generar_nombre_distribucion(distribucion)
-
-print(distribucion)
 
 if(distribucion != 'u' and distribucion != 'e' and distribucion != 'n' and distribucion != 'g' and distribucion != 'p' and distribucion != 'b' and distribucion != 'h' and distribucion != 'po' and distribucion != 'ed'):
     print('Las distribuciones posibles son: u (uniforme), e (exponencial), n (normal), g (gamma), p (pascal), b (binomial), h (hipergeometrica), po (poisson) y ed (empírica discreta)')
@@ -135,97 +115,95 @@ def generar_valores(distribucion):
     valores.extend(normal_samples)
 
   elif(distribucion == 'g'):
-    # Distribución Gamma
-    def funcion_densidad_gamma(x, k=2, theta=2):
-      return gamma.pdf(x, a=k, scale=theta)
-
-    a, b = 0, 15 #REVISAR
+    # Distribución Gamma (función inversa)
     k, theta = 2, 3
-    M = funcion_densidad_gamma((k-1)*theta, k, theta) 
     n = 2**16
-    muestras_gamma = metodo_rechazo_continuo(lambda x: funcion_densidad_gamma(x, k, theta), a, b, M, n)
+    u = np.random.rand(n)
+    muestras_gamma = gamma.ppf(u, a=k, scale=theta)
+    valores.extend(muestras_gamma)
 
-    plt.hist(muestras_gamma, bins=30, density=True, alpha=0.6, label='Gamma')
-    x = np.linspace(a, b, 200)
-    plt.plot(x, funcion_densidad_gamma(x, k, theta), 'r-', label='Gamma PDF')
+    x = np.linspace(0, np.max(muestras_gamma), 200)
+    plt.hist(muestras_gamma, bins=30, density=True, alpha=0.6, label='Muestras (inversa)')
+    plt.plot(x, gamma.pdf(x, a=k, scale=theta), 'r-', label='Gamma PDF teórica')
     plt.legend()
-    plt.title("Gamma")
+    plt.title("Gamma (Función inversa)")
+    plt.xlabel('x')
+    plt.ylabel('Densidad')
     plt.show()
     valores.extend(muestras_gamma)
 
   elif(distribucion == 'p'):
     # Distribución Pascal
-    def funcion_pmf_pascal(k, r=5, p=0.4):
-      return nbinom.pmf(k, r, p)
-
-    r, p = 5, 0.4
-    kmin, kmax = 0, 30
-    M = max([funcion_pmf_pascal(k, r, p) for k in range(kmin, kmax+1)])
+    r, p_pascal = 5, 0.4
     n = 2**16
-    muestras_pascal = metodo_rechazo_discreto(lambda k: funcion_pmf_pascal(k, r, p), kmin, kmax, M, n)
+    u = np.random.rand(n)
+    muestras_pascal = nbinom.ppf(u, r, p_pascal)
+    valores.extend(muestras_pascal)
 
-    plt.hist(muestras_pascal, bins=range(kmin, kmax+2), density=True, alpha=0.6, label='Pascal')
-    x = np.arange(kmin, kmax+1)
-    plt.plot(x, [funcion_pmf_pascal(k, r, p) for k in x], 'ro', label='Pascal PMF')
+    x = np.arange(0, np.max(muestras_pascal)+1)
+    plt.hist(muestras_pascal, bins=range(0, int(np.max(muestras_pascal))+2), density=True, alpha=0.6, label='Muestras (inversa)')
+    plt.plot(x, nbinom.pmf(x, r, p_pascal), 'ro', label='Pascal PMF teórica')
     plt.legend()
-    plt.title("Pascal (Neg. Binomial)")
+    plt.title("Pascal (Función inversa)")
+    plt.xlabel('k')
+    plt.ylabel('Probabilidad')
     plt.show()
     valores.extend(muestras_pascal)
 
   elif(distribucion == 'b'):
     # Distribución Binomial
-
-    def funcion_pmf_binomial(k, n=10, p=0.5):
-      return binom.pmf(k, n, p)
-
     n_bin, p_bin = 10, 0.5
-    kmin, kmax = 0, n_bin
-    M = max([funcion_pmf_binomial(k, n_bin, p_bin) for k in range(kmin, kmax+1)])
-    muestras_binomial = metodo_rechazo_discreto(lambda k: funcion_pmf_binomial(k, n_bin, p_bin), kmin, kmax, M, 2**16)
+    n = 2**16
+    u = np.random.rand(n)
+    muestras_binomial = binom.ppf(u, n_bin, p_bin)
+    valores.extend(muestras_binomial)
 
-    plt.hist(muestras_binomial, bins=range(kmin, kmax+2), density=True, alpha=0.6, label='Binomial')
-    x = np.arange(kmin, kmax+1)
-    plt.plot(x, [funcion_pmf_binomial(k, n_bin, p_bin) for k in x], 'ro', label='Binomial PMF')
+    x = np.arange(0, n_bin+1)
+    plt.hist(muestras_binomial, bins=range(0, n_bin+2), density=True, alpha=0.6, label='Muestras (inversa)')
+    plt.plot(x, binom.pmf(x, n_bin, p_bin), 'ro', label='Binomial PMF teórica')
     plt.legend()
-    plt.title("Binomial")
+    plt.title("Binomial (Función inversa)")
+    plt.xlabel('k')
+    plt.ylabel('Probabilidad')
     plt.show()
     valores.extend(muestras_binomial)
 
   elif(distribucion == 'h'):
 
     # Distribución Hipergeométrica
-    def funcion_hipergeometrica_pmf(k, N=50, K=10, n=5):
-      return hypergeom.pmf(k, N, K, n)
-
     N, K, n_hip = 50, 10, 5
-    kmin, kmax = max(0, n_hip+K-N), min(n_hip, K)
-    M = max([funcion_hipergeometrica_pmf(k, N, K, n_hip) for k in range(kmin, kmax+1)])
-    muestras_hipergeom = metodo_rechazo_discreto(lambda k: funcion_hipergeometrica_pmf(k, N, K, n_hip), kmin, kmax, M, 2**16)
+    n = 2**16
+    u = np.random.rand(n)
+    muestras_hipergeom = hypergeom.ppf(u, N, K, n_hip)
+    valores.extend(muestras_hipergeom)
 
-    plt.hist(muestras_hipergeom, bins=range(kmin, kmax+2), density=True, alpha=0.6, label='Hipergeométrica')
+    kmin, kmax = max(0, n_hip+K-N), min(n_hip, K)
     x = np.arange(kmin, kmax+1)
-    plt.plot(x, [funcion_hipergeometrica_pmf(k, N, K, n_hip) for k in x], 'ro', label='Hipergeométrica PMF')
+    plt.hist(muestras_hipergeom, bins=range(kmin, kmax+2), density=True, alpha=0.6, label='Muestras (inversa)')
+    plt.plot(x, hypergeom.pmf(x, N, K, n_hip), 'ro', label='Hipergeométrica PMF teórica')
     plt.legend()
-    plt.title("Hipergeométrica")
+    plt.title("Hipergeométrica (Función inversa)")
+    plt.xlabel('k')
+    plt.ylabel('Probabilidad')
     plt.show()
     valores.extend(muestras_hipergeom)
 
   elif(distribucion == 'po'):
 
     # Distribución Poisson
-    def funcion_poisson_pmf(k, mu=3):
-      return poisson.pmf(k, mu)
-
     mu = 3
-    kmin, kmax = 0, 12
-    M = max([funcion_poisson_pmf(k, mu) for k in range(kmin, kmax+1)])
-    muestras_poisson = metodo_rechazo_discreto(lambda k: funcion_poisson_pmf(k, mu), kmin, kmax, M, 2**16)
+    n = 2**16
+    u = np.random.rand(n)
+    muestras_poisson = poisson.ppf(u, mu)
+    valores.extend(muestras_poisson)
 
-    plt.hist(muestras_poisson, bins=range(kmin, kmax+2), density=True, alpha=0.6, label='Poisson')
-    x = np.arange(kmin, kmax+1)
-    plt.plot(x, [funcion_poisson_pmf(k, mu) for k in x], 'ro', label='Poisson PMF')
+    x = np.arange(0, np.max(muestras_poisson)+1)
+    plt.hist(muestras_poisson, bins=range(0, int(np.max(muestras_poisson))+2), density=True, alpha=0.6, label='Muestras (inversa)')
+    plt.plot(x, poisson.pmf(x, mu), 'ro', label='Poisson PMF teórica')
     plt.legend()
-    plt.title("Poisson")
+    plt.title("Poisson (Función inversa)")
+    plt.xlabel('k')
+    plt.ylabel('Probabilidad')
     plt.show()
     valores.extend(muestras_poisson)
 
@@ -233,26 +211,33 @@ def generar_valores(distribucion):
     # Distribución Empírica Discreta
     valores_empirica = [1, 2, 3]
     probs_empirica = [0.2, 0.5, 0.3]
-    def funcion_empirica_discreta_pmf(k):
-      return probs_empirica[valores_empirica.index(k)] if k in valores_empirica else 0
-
-    kmin, kmax = min(valores_empirica), max(valores_empirica)
-    M = max(probs_empirica)
-    muestras_empirica = metodo_rechazo_discreto(funcion_empirica_discreta_pmf, kmin, kmax, M, 2**16)
-
-    plt.hist(muestras_empirica, bins=np.arange(kmin, kmax+2)-0.5, density=True, alpha=0.6, label='Empírica')
-    x = np.array(valores_empirica)
-    plt.plot(x, [funcion_empirica_discreta_pmf(k) for k in x], 'ro', label='Empírica PMF')
-    plt.legend()
-    plt.title("Empírica Discreta")
-    plt.show()
+    n = 2**16
+    cdf = np.cumsum(probs_empirica)
+    u = np.random.rand(n)
+    muestras_empirica = []
+    for ui in u:
+        for i, c in enumerate(cdf):
+            if ui < c:
+                muestras_empirica.append(valores_empirica[i])
+                break
     valores.extend(muestras_empirica)
+
+    x = np.array(valores_empirica)
+    plt.hist(muestras_empirica, bins=np.arange(min(x)-0.5, max(x)+1.5), density=True, alpha=0.6, label='Muestras (inversa)')
+    plt.plot(x, probs_empirica, 'ro', label='Empírica PMF teórica')
+    plt.legend()
+    plt.title("Empírica Discreta (Función inversa)")
+    plt.xlabel('k')
+    plt.ylabel('Probabilidad')
+    plt.show()
   return valores
 
 numeros_aleatorios = generar_valores(distribucion)
 
 def evaluar_test(resultado):
-   if(resultado < 0.01):
+   if(resultado == ''):
+      return resultado
+   elif(resultado < 0.01):
       return "FALSE"
    else:
       return "TRUE"
@@ -305,7 +290,7 @@ def test_frecuencia_bloque(valores, tamanio_bloque):
 
     return p_value
 
-#Tesd suma acumulada
+#Test suma acumulada
 def test_suma_acumulada(valores):
    
    # Convertir la secuencia a bits (0s y 1s)
@@ -327,21 +312,120 @@ def test_suma_acumulada(valores):
 
     return p_value
 
+def generar_pmf_dist_discretas(distribucion):
+    # Devuelve la función PMF, kmin y kmax para el test chi-cuadrado
+    if distribucion == 'p':
+        # Pascal (binomial negativa)
+        r, p_pascal = 5, 0.4
+        pmf = lambda k: nbinom.pmf(k, r, p_pascal)
+        kmin, kmax = 0, int(nbinom.ppf(0.999, r, p_pascal))
+        return pmf, kmin, kmax
+    elif distribucion == 'b':
+        # Binomial
+        n_bin, p_bin = 10, 0.5
+        pmf = lambda k: binom.pmf(k, n_bin, p_bin)
+        kmin, kmax = 0, n_bin
+        return pmf, kmin, kmax
+    elif distribucion == 'h':
+        # Hipergeométrica
+        N, K, n_hip = 50, 10, 5
+        pmf = lambda k: hypergeom.pmf(k, N, K, n_hip)
+        kmin, kmax = max(0, n_hip+K-N), min(n_hip, K)
+        return pmf, kmin, kmax
+    elif distribucion == 'po':
+        # Poisson
+        mu = 3
+        pmf = lambda k: poisson.pmf(k, mu)
+        kmin, kmax = 0, int(poisson.ppf(0.999, mu))
+        return pmf, kmin, kmax
+    elif distribucion == 'ed':
+        # Empírica Discreta
+        valores_empirica = [1, 2, 3]
+        probs_empirica = [0.2, 0.5, 0.3]
+        pmf = lambda k: probs_empirica[valores_empirica.index(k)] if k in valores_empirica else 0
+        kmin, kmax = min(valores_empirica), max(valores_empirica)
+        return pmf, kmin, kmax
+    else:
+        raise ValueError("Distribución discreta no soportada para test chi-cuadrado")
+
+# Test de bondad de ajuste: Chi-cuadrado para distribuciones discretas
+def test_chi_cuadrado(valores, pmf, kmin, kmax, bins=None):
+    # Contar frecuencias observadas
+    if bins is None:
+        bins = np.arange(kmin, kmax+2)
+    obs, _ = np.histogram(valores, bins=bins)
+    # Calcular frecuencias esperadas
+    esperadas = [pmf(k) * len(valores) for k in range(kmin, kmax+1)]
+    # Eliminar categorías con frecuencia esperada muy baja (<5)
+    obs_filtrado = []
+    esp_filtrado = []
+    for o, e in zip(obs, esperadas):
+        if e >= 5:
+            obs_filtrado.append(o)
+            esp_filtrado.append(e)
+    # Normalizar esperadas para que sumen igual que observadas
+    suma_obs = sum(obs_filtrado)
+    suma_esp = sum(esp_filtrado)
+    if suma_esp > 0:
+        esp_filtrado = [e * suma_obs / suma_esp for e in esp_filtrado]
+    # Test chi-cuadrado
+    chi2, p_value = chisquare(obs_filtrado, f_exp=esp_filtrado)
+    return p_value
+
+def generar_cdf_dist_continuas(distribucion):
+   # Devuelve la función CDF y los parámetros para el test KS
+    if distribucion == 'u':
+        # Uniforme en [a, b]
+        a, b = 0, 1
+        return (lambda x, *args: (x - a) / (b - a)), a, b  # CDF manual
+    elif distribucion == 'e':
+        # Exponencial con lambda=1
+        lambd = 1
+        return expon.cdf, 0, 1/lambd  # loc=0, scale=1/lambda
+    elif distribucion == 'n':
+        # Normal estándar
+        mu, sigma = 0, 1
+        return norm.cdf, mu, sigma
+    elif distribucion == 'g':
+        # Gamma con k=2, theta=3
+        k, theta = 2, 3
+        return gamma.cdf, k, 0, theta  # a, loc, scale
+    else:
+        raise ValueError("Distribución continua no soportada para test KS")
+
+# Test de bondad de ajuste: Kolmogorov-Smirnov para distribuciones continuas
+def test_ks(valores, cdf, *params):
+    # cdf: función de distribución acumulada teórica (por ejemplo, gamma.cdf)
+    # params: parámetros de la distribución
+    # kstest espera una función que reciba un solo argumento x
+    p_value = kstest(valores, cdf, args=tuple(params)).pvalue
+    return p_value
+
 ## Funciones para los tests
 
-resultados_test_frecuencia = test_frecuencia_bloque(numeros_aleatorios, 2**7)
+resultado_test_frecuencia = test_frecuencia_bloque(numeros_aleatorios, 2**7)
 
 resultado_test_suma_acumulada = test_suma_acumulada(numeros_aleatorios)
 
+resultado_test_chi_cuadrado = ''
+resultado_test_KS = ''
+if(distribucion == 'u' or distribucion == 'e' or distribucion == 'n' or distribucion == 'g'):
+   cdf, *params = generar_cdf_dist_continuas(distribucion)
+   resultado_test_KS = test_ks(numeros_aleatorios, cdf, *params)
+else:
+   pmf, kmin, kmax = generar_pmf_dist_discretas(distribucion)
+   resultado_test_chi_cuadrado = test_chi_cuadrado(numeros_aleatorios, pmf, kmin, kmax)
+
+
 def mostrar_resultados_en_tabla(resultados_tests):
 
-    fig, ax = plt.subplots(figsize=(8, len(resultados_tests) * 0.5))
+    fig, ax = plt.subplots(figsize=(11, len(resultados_tests) * 0.5))
     ax.axis('tight')
     ax.axis('off')
 
     # Crear la tabla
-    tabla = plt.table(cellText=[resultados_tests],
-                      colLabels=["Distribución", "Test1: Frecuencia(bloques)", "Test2: Suma Acumulada"],
+    tabla = plt.table(cellText=resultados_tests,
+                      colLabels=["Distribución", "Test1: Frecuencia(bloques)", "Test2: Suma Acumulada", "Test3: Chi-Cuadrado", "Test4: Kolmogorov-Smirnov"],
                       loc='center',
                       cellLoc='center')
 
@@ -351,6 +435,7 @@ def mostrar_resultados_en_tabla(resultados_tests):
 
     plt.show()
 
-datos_distribucion = [generar_nombre_distribucion(distribucion), evaluar_test(resultados_test_frecuencia), evaluar_test(resultado_test_suma_acumulada)]
+datos_distribucion = [generar_nombre_distribucion(distribucion), evaluar_test(resultado_test_frecuencia), evaluar_test(resultado_test_suma_acumulada), evaluar_test(resultado_test_chi_cuadrado), evaluar_test(resultado_test_KS)]
+datos = [datos_distribucion]
 
-mostrar_resultados_en_tabla(datos_distribucion)
+mostrar_resultados_en_tabla(datos)

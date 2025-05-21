@@ -367,6 +367,11 @@ def test_chi_cuadrado(valores, pmf, kmin, kmax, bins=None):
         if e >= 5:
             obs_filtrado.append(o)
             esp_filtrado.append(e)
+    # Normalizar esperadas para que sumen igual que observadas
+    suma_obs = sum(obs_filtrado)
+    suma_esp = sum(esp_filtrado)
+    if suma_esp > 0:
+        esp_filtrado = [e * suma_obs / suma_esp for e in esp_filtrado]
     # Test chi-cuadrado
     chi2, p_value = chisquare(obs_filtrado, f_exp=esp_filtrado)
     return p_value
@@ -418,7 +423,7 @@ else:
 
 def mostrar_resultados_en_tabla(resultados_tests):
 
-    fig, ax = plt.subplots(figsize=(8, len(resultados_tests) * 0.5))
+    fig, ax = plt.subplots(figsize=(11, len(resultados_tests) * 0.5))
     ax.axis('tight')
     ax.axis('off')
 
