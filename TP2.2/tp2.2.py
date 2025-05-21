@@ -54,8 +54,6 @@ def generar_valores(distribucion):
     resultados_uniforme  = [uniforme(a, b) for _ in range(n)]
     valores.extend(resultados_uniforme)
 
-    # Visualización
-
     plt.hist(resultados_uniforme, bins=100, density=True, alpha=0.6, label='Muestras (inversa)')
 
     plt.plot([a, b], [1/(b-a), 1/(b-a)], 'r-', label='Densidad uniforme teórica')
@@ -92,6 +90,7 @@ def generar_valores(distribucion):
   elif(distribucion == 'n'):
     
     # Distribución Normal
+    
     mu = 0       # media
     sigma = 1    # desviación estándar
     n = 2**16    # cantidad de números aleatorios
