@@ -268,7 +268,9 @@ for corrida in range(1, cant_corridas+1):
     total_eventos = len(historial_num_en_cola)
     for n in range(0, max(historial_num_en_cola) + 1):
         prob_por_n.append(historial_num_en_cola.count(n) / total_eventos)
-    prob_n_en_cola.append(prob_por_n)
+    #prob_n_en_cola.append(prob_por_n)
+
+    
 
 # Graficar cada métrica
 plt.figure(figsize=(12, 8))
