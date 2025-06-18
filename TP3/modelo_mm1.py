@@ -172,9 +172,9 @@ def main():
 
     # Leer los parámetros desde consola
     print("Simulador M/M/1")
-    tiempo_medio_entre_llegadas = float(input("Ingrese el tiempo medio entre llegadas: "))
-    tiempo_medio_servicio = float(input("Ingrese el tiempo medio de servicio: "))
-    num_retrasos_requeridos = int(input("Ingrese la cantidad de clientes a simular: "))
+    tiempo_medio_entre_llegadas = float(sys.argv[2])
+    tiempo_medio_servicio = float(sys.argv[4])
+    num_retrasos_requeridos = int(sys.argv[6])
 
     num_eventos = 2
 
@@ -203,7 +203,10 @@ def main():
 if __name__ == "__main__":
     main()
 
-
+# Validamos que la ejecución del programa sea correcta
+if(len(sys.argv) != 7 or sys.argv[1] != '-a' or sys.argv[3] != '-s' or sys.argv[5] != '-c'):
+  print("Uso: python modelo_mm1.py -a <tiempo medio entre arribos> -s <tiempo medio de servicio> -c <cantidad de clientes a simular>")
+  sys.exit(1)
 
 # Lista de tamaños de cola que queremos evaluar
 limites_cola = [0, 2, 5, 10, 50]
@@ -264,7 +267,7 @@ for limite in limites_cola:
         prob_por_n.append(historial_num_en_cola.count(n) / total_eventos)
     prob_n_en_cola.append(prob_por_n)
 
-# 📈 Graficar cada métrica
+# Graficar cada métrica
 plt.figure(figsize=(12, 8))
 
 # Clientes en sistema
@@ -273,6 +276,7 @@ plt.plot(limites_cola, clientes_en_sistema_prom, marker='o')
 plt.title("Promedio de clientes en el sistema")
 plt.xlabel("Tamaño máximo de cola")
 plt.ylabel("Clientes")
+plt.grid(True)
 
 # Clientes en cola
 plt.subplot(2, 3, 2)
@@ -280,6 +284,7 @@ plt.plot(limites_cola, clientes_en_cola_prom, marker='o', color='orange')
 plt.title("Promedio de clientes en cola")
 plt.xlabel("Tamaño máximo de cola")
 plt.ylabel("Clientes")
+plt.grid(True)
 
 # Tiempo en sistema
 plt.subplot(2, 3, 3)
@@ -287,6 +292,7 @@ plt.plot(limites_cola, tiempos_en_sistema_prom, marker='o', color='green')
 plt.title("Tiempo promedio en el sistema")
 plt.xlabel("Tamaño máximo de cola")
 plt.ylabel("Tiempo (min)")
+plt.grid(True)
 
 # Tiempo en cola
 plt.subplot(2, 3, 4)
@@ -294,6 +300,7 @@ plt.plot(limites_cola, tiempos_en_cola_prom, marker='o', color='red')
 plt.title("Tiempo promedio en cola")
 plt.xlabel("Tamaño máximo de cola")
 plt.ylabel("Tiempo (min)")
+plt.grid(True)
 
 # Utilización del servidor
 plt.subplot(2, 3, 5)
@@ -301,6 +308,7 @@ plt.plot(limites_cola, utilizaciones, marker='o', color='purple')
 plt.title("Utilización del servidor")
 plt.xlabel("Tamaño máximo de cola")
 plt.ylabel("Porcentaje")
+plt.grid(True)
 
 # Probabilidad de denegación
 plt.subplot(2, 3, 6)
@@ -308,6 +316,7 @@ plt.plot(limites_cola, prob_denegacion, marker='o', color='brown')
 plt.title("Probabilidad de denegación")
 plt.xlabel("Tamaño máximo de cola")
 plt.ylabel("Probabilidad")
+plt.grid(True)
 
 plt.tight_layout()
 plt.show()
